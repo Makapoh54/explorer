@@ -21,7 +21,6 @@ angular.module('ethExplorer')
     $scope.updateBlocks = () => {
         var prevBlockNumber = $rootScope.blockNum;
         var currentBlockNumber = parseInt(web3.eth.blockNumber, 10);
-        console.log('bef', prevBlockNumber,currentBlockNumber)
         if(prevBlockNumber < currentBlockNumber) {
             maxBlocks = 30;
             if (maxBlocks > currentBlockNumber) {
@@ -33,7 +32,6 @@ angular.module('ethExplorer')
             }
 
             Promise.all(promiseArray).then(result => {
-                console.log('after', $rootScope.blockNum, currentBlockNumber, result)
                 if($rootScope.blockNum < currentBlockNumber) {
                     $rootScope.blockNum = currentBlockNumber;
                     $rootScope.blocks = result;
