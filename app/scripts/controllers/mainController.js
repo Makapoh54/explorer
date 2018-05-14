@@ -20,15 +20,22 @@ angular.module('ethExplorer')
 
     setInterval(() => {
         var prevBlockNumber = $rootScope.blockNum;
-        $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
-        if(prevBlockNumber < $rootScope.blockNum) {
-            var promiseArray = [];
-            for (var i = 0; i < ($rootScope.blockNum - prevBlockNumber); ++i) {
-                promiseArray.push(getBlockAsync($rootScope.blockNum - i));
-                $rootScope.blocks.shift();
+        var currentBlockNumber = parseInt(web3.eth.blockNumber, 10);
+        if(prevBlockNumber < currentBlockNumber) {
+            maxBlocks = 30;
+            if (maxBlocks > currentBlockNumber) {
+                maxBlocks = currentBlockNumber + 1;
             }
+            var promiseArray = [];
+            for (var i = 0; i < maxBlocks; ++i) {
+                promiseArray.push(getBlockAsync(blockNum - i));
+            }
+            
             Promise.all(promiseArray).then(result => {
-                $rootScope.blocks = $rootScope.blocks.concat(result);
+                if($rootScope.blockNum < currentBlockNumber) {
+                    $rootScope.blockNum = currentBlockNumber;
+                    $rootScope.blocks = result;
+                }
             });
         }
     }, 3000);
