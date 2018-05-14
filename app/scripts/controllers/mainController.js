@@ -9,8 +9,8 @@ angular.module('ethExplorer')
 	}
     
     var promiseArray = [];
-	for (var i = blockNum - maxBlocks; i < blockNum; i++) {
-	    promiseArray.push(getBlockAsync(i));
+	for (var i = 0; i < maxBlocks; ++i) {
+	    promiseArray.push(getBlockAsync(blockNum - i));
     }
     
     Promise.all(promiseArray).then(result => {
@@ -23,8 +23,8 @@ angular.module('ethExplorer')
         $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
         if(prevBlockNumber < $rootScope.blockNum) {
             var promiseArray = [];
-            for (var i = prevBlockNumber; i <= $rootScope.blockNum; i++) {
-                promiseArray.push(getBlockAsync(i));
+            for (var i = 0; i < ($rootScope.blockNum - prevBlockNumber); ++i) {
+                promiseArray.push(getBlockAsync($rootScope.blockNum - i));
                 $rootScope.blocks.shift();
             }
             Promise.all(promiseArray).then(result => {
