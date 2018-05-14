@@ -3,7 +3,7 @@ angular.module('ethExplorer')
 
 	var web3 = $rootScope.web3;
 	var maxBlocks = 30; // TODO: into setting file or user select
-	var blockNum = $scope.blockNum = parseInt(web3.eth.blockNumber, 10);
+	var blockNum = $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
 	if (maxBlocks > blockNum) {
 	    maxBlocks = blockNum + 1;
 	}
@@ -14,11 +14,12 @@ angular.module('ethExplorer')
     }
     
     Promise.all(promiseArray).then(result => {
-        $scope.blocks = result;
+	$rootScope.blocks = [];
+        $rootScope.blocks = $rootScope.blocks.concat(result);
     });
-
-    setInterval(() => {
-        var prevBlockNumber = $scope.blockNum;
+    
+    $scope.updateBlocks = () => {
+        var prevBlockNumber = $rootScope.blockNum;
         var currentBlockNumber = parseInt(web3.eth.blockNumber, 10);
         console.log('bef', prevBlockNumber,currentBlockNumber)
         if(prevBlockNumber < currentBlockNumber) {
@@ -28,18 +29,21 @@ angular.module('ethExplorer')
             }
             var promiseArray = [];
             for (var i = 0; i < maxBlocks; ++i) {
-                promiseArray.push(getBlockAsync(blockNum - i));
+                promiseArray.push(getBlockAsync(currentBlockNumber - i));
             }
-            
+
             Promise.all(promiseArray).then(result => {
-                console.log('after', $scope.blockNum, currentBlockNumber, result)
-                if($scope.blockNum < currentBlockNumber) {
-                    $scope.blockNum = currentBlockNumber;
-                    $scope.blocks = result;
+                console.log('after', $rootScope.blockNum, currentBlockNumber, result)
+                if($rootScope.blockNum < currentBlockNumber) {
+                    $rootScope.blockNum = currentBlockNumber;
+                    $rootScope.blocks = result;
+		    $scope.$apply();
                 }
             });
         }
-    }, 3000);
+    }
+
+    setInterval($scope.updateBlocks, 3000);
 	
         $scope.processRequest = function() {
              var requestStr = $scope.ethRequest.split('0x').join('');
