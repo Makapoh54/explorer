@@ -18,7 +18,7 @@ angular.module('ethExplorer')
         $rootScope.blocks = $rootScope.blocks.concat(result);
     });
 
-    setTimeout(() => {
+    setInterval(() => {
         var prevBlockNumber = $rootScope.blockNum;
         $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
         if(prevBlockNumber < $rootScope.blockNum) {
