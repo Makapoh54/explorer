@@ -2,17 +2,36 @@ angular.module('ethExplorer')
     .controller('mainCtrl', function ($rootScope, $scope, $location) {
 
 	var web3 = $rootScope.web3;
-	var maxBlocks = 50; // TODO: into setting file or user select
-	var blockNum = $scope.blockNum = parseInt(web3.eth.blockNumber, 10);
+	var maxBlocks = 30; // TODO: into setting file or user select
+	var blockNum = $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
 	if (maxBlocks > blockNum) {
 	    maxBlocks = blockNum + 1;
 	}
+    
+    var promiseArray = [];
+	for (var i = blockNum - maxBlocks; i < blockNum; i++) {
+	    promiseArray.push(getBlockAsync(i));
+    }
+    
+    Promise.all(promiseArray).then(result => {
+        $rootScope.blocks = [];
+        $rootScope.blocks = $rootScope.blocks.concat(result);
+    });
 
-	// get latest 50 blocks
-	$scope.blocks = [];
-	for (var i = 0; i < maxBlocks; ++i) {
-	    $scope.blocks.push(web3.eth.getBlock(blockNum - i));
-	}
+    setTimeout(() => {
+        var prevBlockNumber = $rootScope.blockNum;
+        $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
+        if(prevBlockNumber < $rootScope.blockNum) {
+            var promiseArray = [];
+            for (var i = prevBlockNumber; i <= $rootScope.blockNum; i++) {
+                promiseArray.push(getBlockAsync(i));
+                $rootScope.blocks.shift();
+            }
+            Promise.all(promiseArray).then(result => {
+                $rootScope.blocks = $rootScope.blocks.concat(result);
+            });
+        }
+    }, 3000);
 	
         $scope.processRequest = function() {
              var requestStr = $scope.ethRequest.split('0x').join('');
@@ -41,6 +60,15 @@ angular.module('ethExplorer')
 
          function goToTxInfos (requestStr) {
              $location.path('/transaction/'+requestStr);
+        }
+
+        function getBlockAsync(blockNum) {
+            return new Promise((resolve, reject) => {
+                web3.eth.getBlock(blockNum, (error, result) => { 
+                    if(error) reject();
+                    resolve(result);
+                })
+            })
         }
 
     });
