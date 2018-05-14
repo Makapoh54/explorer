@@ -3,7 +3,7 @@ angular.module('ethExplorer')
 
 	var web3 = $rootScope.web3;
 	var maxBlocks = 30; // TODO: into setting file or user select
-	var blockNum = $rootScope.blockNum = parseInt(web3.eth.blockNumber, 10);
+	var blockNum = $scope.blockNum = parseInt(web3.eth.blockNumber, 10);
 	if (maxBlocks > blockNum) {
 	    maxBlocks = blockNum + 1;
 	}
@@ -14,13 +14,13 @@ angular.module('ethExplorer')
     }
     
     Promise.all(promiseArray).then(result => {
-        $rootScope.blocks = [];
-        $rootScope.blocks = $rootScope.blocks.concat(result);
+        $scope.blocks = result;
     });
 
     setInterval(() => {
-        var prevBlockNumber = $rootScope.blockNum;
+        var prevBlockNumber = $scope.blockNum;
         var currentBlockNumber = parseInt(web3.eth.blockNumber, 10);
+        console.log('bef', prevBlockNumber,currentBlockNumber)
         if(prevBlockNumber < currentBlockNumber) {
             maxBlocks = 30;
             if (maxBlocks > currentBlockNumber) {
@@ -32,9 +32,10 @@ angular.module('ethExplorer')
             }
             
             Promise.all(promiseArray).then(result => {
-                if($rootScope.blockNum < currentBlockNumber) {
-                    $rootScope.blockNum = currentBlockNumber;
-                    $rootScope.blocks = result;
+                console.log('after', $scope.blockNum, currentBlockNumber, result)
+                if($scope.blockNum < currentBlockNumber) {
+                    $scope.blockNum = currentBlockNumber;
+                    $scope.blocks = result;
                 }
             });
         }
